@@ -11,7 +11,7 @@ creation commands.
 
 from evennia.contrib.game_systems.cooldowns import CooldownHandler
 from evennia.objects.objects import DefaultCharacter
-from evennia.typeclasses.attributes import AttributeProperty, NAttributeProperty
+from evennia.typeclasses.attributes import NAttributeProperty
 from evennia.utils.evform import EvForm
 from evennia.utils.evtable import EvTable
 from evennia.utils.logger import log_trace
@@ -39,21 +39,117 @@ if TYPE_CHECKING:
 class BaseCharacter(ObjectParent, DefaultCharacter):
     is_pc = False
 
-    hp = AttributeProperty(default=1)
-    hp_max = AttributeProperty(default=1)
-    mana = AttributeProperty(default=1)
-    mana_max = AttributeProperty(default=1)
-    stamina = AttributeProperty(default=1)
-    stamina_max = AttributeProperty(default=1)
-
-    strength = AttributeProperty(default=1)
-    will = AttributeProperty(default=1)
-    cunning = AttributeProperty(default=1)
-
-    cclass_key = AttributeProperty()
-    race_key = AttributeProperty()
-
-    aggro = AttributeProperty(default="n")  # Defensive, Normal, or Aggressive (d/n/a)
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.hp = 1
+        self.db.hp_max = 1
+        self.db.mana = 1
+        self.db.mana_max = 1
+        self.db.stamina = 1
+        self.db.stamina_max = 1
+        self.db.strength = 1
+        self.db.will = 1
+        self.db.cunning = 1
+        self.db.cclass_key = None
+        self.db.race_key = None
+        self.db.aggro = "n"  # Defensive, Normal, or Aggressive (d/n/a)
+    
+    # Character stats properties
+    @property
+    def hp(self):
+        return self.db.hp or 1
+    
+    @hp.setter
+    def hp(self, value):
+        self.db.hp = value
+    
+    @property
+    def hp_max(self):
+        return self.db.hp_max or 1
+    
+    @hp_max.setter
+    def hp_max(self, value):
+        self.db.hp_max = value
+    
+    @property
+    def mana(self):
+        return self.db.mana or 1
+    
+    @mana.setter
+    def mana(self, value):
+        self.db.mana = value
+    
+    @property
+    def mana_max(self):
+        return self.db.mana_max or 1
+    
+    @mana_max.setter
+    def mana_max(self, value):
+        self.db.mana_max = value
+    
+    @property
+    def stamina(self):
+        return self.db.stamina or 1
+    
+    @stamina.setter
+    def stamina(self, value):
+        self.db.stamina = value
+    
+    @property
+    def stamina_max(self):
+        return self.db.stamina_max or 1
+    
+    @stamina_max.setter
+    def stamina_max(self, value):
+        self.db.stamina_max = value
+    
+    @property
+    def strength(self):
+        return self.db.strength or 1
+    
+    @strength.setter
+    def strength(self, value):
+        self.db.strength = value
+    
+    @property
+    def will(self):
+        return self.db.will or 1
+    
+    @will.setter
+    def will(self, value):
+        self.db.will = value
+    
+    @property
+    def cunning(self):
+        return self.db.cunning or 1
+    
+    @cunning.setter
+    def cunning(self, value):
+        self.db.cunning = value
+    
+    @property
+    def cclass_key(self):
+        return self.db.cclass_key
+    
+    @cclass_key.setter
+    def cclass_key(self, value):
+        self.db.cclass_key = value
+    
+    @property
+    def race_key(self):
+        return self.db.race_key
+    
+    @race_key.setter
+    def race_key(self, value):
+        self.db.race_key = value
+    
+    @property
+    def aggro(self):
+        return self.db.aggro or "n"
+    
+    @aggro.setter
+    def aggro(self, value):
+        self.db.aggro = value
 
     @property
     def cclass(self) -> CharacterClass | None:
@@ -274,19 +370,28 @@ class Character(BaseCharacter):
 
     is_pc = True
 
-    hp = AttributeProperty(default=10)
-    hp_max = AttributeProperty(default=10)
-    mana = AttributeProperty(default=10)
-    mana_max = AttributeProperty(default=10)
-    stamina = AttributeProperty(default=4)
-    stamina_max = AttributeProperty(default=4)
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.hp = 10
+        self.db.hp_max = 10
+        self.db.mana = 10
+        self.db.mana_max = 10
+        self.db.stamina = 4
+        self.db.stamina_max = 4
+        self.db.coins = 0  # copper coins
 
     # Combat State Tracking
 
-
     adelay = NAttributeProperty( default=0.0 ) # delay attacks until float time
     mdelay = NAttributeProperty( default=0.0 ) # delay movement until float time
-    coins = AttributeProperty(default=0)  # copper coins
+    
+    @property
+    def coins(self):
+        return self.db.coins or 0
+    
+    @coins.setter
+    def coins(self, value):
+        self.db.coins = value
 
 
     @lazy_property

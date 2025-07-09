@@ -18,7 +18,7 @@ AUTO_CREATE_CHARACTER_WITH_ACCOUNT = False
 AUTO_PUPPET_ON_LOGIN = False
 MAX_NR_CHARACTERS = 5
 
-FILE_HELP_ENTRY_MODULES = [ 'world.help.combat_help' ]
+FILE_HELP_ENTRY_MODULES = []  # Temporarily disabled due to evmenu issue
 
 
 # lightly customized websocket protocol to play better with the custom client

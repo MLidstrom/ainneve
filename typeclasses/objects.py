@@ -7,7 +7,6 @@ Note that the default Character, Room and Exit do not inherit from Object,
 but do inherit from the provided mixin ObjectParent by default.
 
 """
-from evennia import AttributeProperty
 from evennia.objects.objects import DefaultObject
 from evennia.utils.utils import make_iter
 
@@ -33,18 +32,43 @@ class Object(ObjectParent, DefaultObject):
 
     """
 
-    # inventory management
-    inventory_use_slot = AttributeProperty(WieldLocation.BACKPACK)
-    # how many inventory slots it uses (can be a fraction)
-    size = AttributeProperty(1)
-    value = AttributeProperty(0)
+    def at_object_creation(self):
+        # inventory management
+        self.db.inventory_use_slot = WieldLocation.BACKPACK
+        # how many inventory slots it uses (can be a fraction)
+        self.db.size = 1
+        self.db.value = 0
+        
+        # Set up object types
+        for obj_type in make_iter(self.obj_type):
+            self.tags.add(obj_type.value, category="obj_type")
+    
+    @property
+    def inventory_use_slot(self):
+        return self.db.inventory_use_slot or WieldLocation.BACKPACK
+    
+    @inventory_use_slot.setter
+    def inventory_use_slot(self, value):
+        self.db.inventory_use_slot = value
+    
+    @property
+    def size(self):
+        return self.db.size or 1
+    
+    @size.setter
+    def size(self, value):
+        self.db.size = value
+    
+    @property
+    def value(self):
+        return self.db.value or 0
+    
+    @value.setter
+    def value(self, value):
+        self.db.value = value
 
     # can also be an iterable, for adding multiple obj-type tags
     obj_type = ObjType.GEAR
-
-    def at_object_creation(self):
-        for obj_type in make_iter(self.obj_type):
-            self.tags.add(obj_type.value, category="obj_type")
 
     def get_display_header(self, looker, **kwargs):
         return ""  # this is handled by get_obj_stats
@@ -86,7 +110,18 @@ class ObjectFiller(Object):
     """
 
     obj_type = ObjType.QUEST.value  # can't be sold
-    quality = AttributeProperty(0)
+    
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.quality = 0
+    
+    @property
+    def quality(self):
+        return self.db.quality or 0
+    
+    @quality.setter
+    def quality(self, value):
+        self.db.quality = value
 
 
 class QuestObject(Object):
@@ -96,7 +131,10 @@ class QuestObject(Object):
     """
 
     obj_type = ObjType.QUEST
-    value = AttributeProperty(0)
+    
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.value = 0
 
 
 class TreasureObject(Object):
@@ -106,7 +144,10 @@ class TreasureObject(Object):
     """
 
     obj_type = ObjType.TREASURE
-    value = AttributeProperty(100)
+    
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.value = 100
 
 
 class ConsumableObject(Object):
@@ -117,8 +158,19 @@ class ConsumableObject(Object):
     """
 
     obj_type = ObjType.CONSUMABLE
-    size = AttributeProperty(0.25)
-    uses = AttributeProperty(1)
+    
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.size = 0.25
+        self.db.uses = 1
+    
+    @property
+    def uses(self):
+        return self.db.uses or 1
+    
+    @uses.setter
+    def uses(self, value):
+        self.db.uses = value
 
     def at_use(self, user, *args, **kwargs):
         """
@@ -154,19 +206,82 @@ class WeaponObject(Object):
     """
 
     obj_type = ObjType.WEAPON
-    inventory_use_slot: WieldLocation = AttributeProperty(WieldLocation.WEAPON_HAND)
-    quality: int = AttributeProperty(3)
-
-    # maximum attack range for this weapon
-    attack_range: CombatRange = AttributeProperty(CombatRange.MELEE)
-    attack_type: AttackType = AttributeProperty(AttackType.MELEE)
-    # what defense stat of the enemy it must defeat
-    defense_type: Ability = AttributeProperty(Ability.ARMOR)
-
-    min_damage: int = AttributeProperty(1)
-    max_damage: int = AttributeProperty(4)
-    stamina_cost: int = AttributeProperty(2)
-    cooldown: int = AttributeProperty(2)
+    
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.inventory_use_slot = WieldLocation.WEAPON_HAND
+        self.db.quality = 3
+        self.db.attack_range = CombatRange.MELEE
+        self.db.attack_type = AttackType.MELEE
+        self.db.defense_type = Ability.ARMOR
+        self.db.min_damage = 1
+        self.db.max_damage = 4
+        self.db.stamina_cost = 2
+        self.db.cooldown = 2
+    
+    @property
+    def quality(self):
+        return self.db.quality or 3
+    
+    @quality.setter
+    def quality(self, value):
+        self.db.quality = value
+    
+    @property
+    def attack_range(self):
+        return self.db.attack_range or CombatRange.MELEE
+    
+    @attack_range.setter
+    def attack_range(self, value):
+        self.db.attack_range = value
+    
+    @property
+    def attack_type(self):
+        return self.db.attack_type or AttackType.MELEE
+    
+    @attack_type.setter
+    def attack_type(self, value):
+        self.db.attack_type = value
+    
+    @property
+    def defense_type(self):
+        return self.db.defense_type or Ability.ARMOR
+    
+    @defense_type.setter
+    def defense_type(self, value):
+        self.db.defense_type = value
+    
+    @property
+    def min_damage(self):
+        return self.db.min_damage or 1
+    
+    @min_damage.setter
+    def min_damage(self, value):
+        self.db.min_damage = value
+    
+    @property
+    def max_damage(self):
+        return self.db.max_damage or 4
+    
+    @max_damage.setter
+    def max_damage(self, value):
+        self.db.max_damage = value
+    
+    @property
+    def stamina_cost(self):
+        return self.db.stamina_cost or 2
+    
+    @stamina_cost.setter
+    def stamina_cost(self, value):
+        self.db.stamina_cost = value
+    
+    @property
+    def cooldown(self):
+        return self.db.cooldown or 2
+    
+    @cooldown.setter
+    def cooldown(self, value):
+        self.db.cooldown = value
 
 
 class Runestone(WeaponObject, ConsumableObject):
@@ -179,12 +294,22 @@ class Runestone(WeaponObject, ConsumableObject):
     """
 
     obj_type = (ObjType.WEAPON, ObjType.MAGIC)
-    inventory_use_slot = WieldLocation.TWO_HANDS
-    quality = AttributeProperty(3)
-
-    attack_type = AttributeProperty(Ability.WIL)
-    defense_type = AttributeProperty(Ability.CUN)
-    damage_roll = AttributeProperty("1d8")
+    
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.inventory_use_slot = WieldLocation.TWO_HANDS
+        self.db.quality = 3
+        self.db.attack_type = Ability.WIL
+        self.db.defense_type = Ability.CUN
+        self.db.damage_roll = "1d8"
+    
+    @property
+    def damage_roll(self):
+        return self.db.damage_roll or "1d8"
+    
+    @damage_roll.setter
+    def damage_roll(self, value):
+        self.db.damage_roll = value
 
     def at_post_use(self, user, *args, **kwargs):
         """Called after the spell was cast"""
@@ -203,10 +328,28 @@ class ArmorObject(Object):
     """
 
     obj_type = ObjType.ARMOR
-    inventory_use_slot = WieldLocation.BODY
-
-    armor = AttributeProperty(1)
-    quality = AttributeProperty(3)
+    
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.inventory_use_slot = WieldLocation.BODY
+        self.db.armor = 1
+        self.db.quality = 3
+    
+    @property
+    def armor(self):
+        return self.db.armor or 1
+    
+    @armor.setter
+    def armor(self, value):
+        self.db.armor = value
+    
+    @property
+    def quality(self):
+        return self.db.quality or 3
+    
+    @quality.setter
+    def quality(self, value):
+        self.db.quality = value
 
 
 class Shield(ArmorObject):
@@ -216,7 +359,10 @@ class Shield(ArmorObject):
     """
 
     obj_type = ObjType.SHIELD
-    inventory_use_slot = WieldLocation.SHIELD_HAND
+    
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.inventory_use_slot = WieldLocation.SHIELD_HAND
 
 
 class Helmet(ArmorObject):
@@ -226,4 +372,7 @@ class Helmet(ArmorObject):
     """
 
     obj_type = ObjType.HELMET
-    inventory_use_slot = WieldLocation.HEAD
+    
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.inventory_use_slot = WieldLocation.HEAD
