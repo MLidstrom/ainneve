@@ -24,6 +24,9 @@ FILE_HELP_ENTRY_MODULES = [ 'world.help.combat_help' ]
 # lightly customized websocket protocol to play better with the custom client
 WEBSOCKET_PROTOCOL_CLASS = "server.portal.websocket.WebSocketClient"
 
+# Fix for telnet echo bug - makes characters visible when typing
+TELNET_PROTOCOL_CLASS = "server.conf.fix_telnet_echo.TelnetProtocol"
+
 # CACHE BUSTERRRR
 TEMPLATES[0]["OPTIONS"]["context_processors"].append("web.custom_context.extra_context")
 

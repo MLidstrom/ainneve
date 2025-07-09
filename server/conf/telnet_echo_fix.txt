@@ -1,0 +1,32 @@
+TELNET ECHO FIX APPLIED TO AINNEVE
+===================================
+
+PROBLEM IDENTIFIED:
+Ainneve (like base Evennia) wasn't sending the "IAC WILL ECHO" command during telnet negotiation.
+This caused telnet clients to not see what they were typing.
+
+BEFORE FIX:
+- Server sent various telnet options but not ECHO
+- Client kept local echo on (characters not visible when typing)
+
+AFTER FIX:
+- Server now sends "IAC WILL 1 (ECHO)" during connection
+- This tells the client that the server will handle echoing
+- Client should turn off local echo and let server echo back characters
+
+SOLUTION APPLIED:
+- Created custom TelnetProtocol in server/conf/fix_telnet_echo.py
+- Added TELNET_PROTOCOL_CLASS setting to use the custom protocol
+- Custom protocol forces sending "IAC WILL ECHO" on connection
+
+CHANGES MADE:
+1. Created: server/conf/fix_telnet_echo.py
+2. Modified: server/conf/settings.py
+   - Added: TELNET_PROTOCOL_CLASS = "server.conf.fix_telnet_echo.TelnetProtocol"
+
+TESTING:
+After restarting the Ainneve server, telnet connections should now properly display
+what you type when connecting via telnet to localhost:4000.
+
+The telnet echo bug has been fixed. You should now be able to see what you 
+type when connecting via telnet to your Ainneve game.
